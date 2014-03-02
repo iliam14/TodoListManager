@@ -15,19 +15,18 @@ class ColorListAdapter extends ArrayAdapter<String> {
 	public ColorListAdapter(Context context, int resource,
 			List<String> objects) {
 		super(context, resource, objects);
-		// TODO Auto-generated constructor stub
 	}
 
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
-		// TODO Auto-generated method stub
 		TextView tv = (TextView) super.getView(position, convertView, parent);
+		// Set Alternative color 
 		if (position %2 == 0 )
 			tv.setTextColor(Color.RED);
 		else
 			tv.setTextColor(Color.BLUE);
 		return tv;
-		//return super.getView(position, convertView, parent);
+		
 		
 	}
  

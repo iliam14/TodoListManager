@@ -25,35 +25,36 @@ public class TodoListManagerActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         list = new ArrayList<String>();
-        //list.add("Hi");
+        
         setContentView(R.layout.activity_todo_list_manager);
-       taskAdapter = new ColorListAdapter(this, R.layout.single_list_item, list);
-       taskAdapter.setNotifyOnChange(true);
+        taskAdapter = new ColorListAdapter(this, R.layout.single_list_item, list);
+        taskAdapter.setNotifyOnChange(true);
+        
         ListView lstToDoItems = (ListView)findViewById(R.id.lstTodoItems);
         lstToDoItems.setAdapter(taskAdapter);
-        
         lstToDoItems.setOnItemLongClickListener(new OnItemLongClickListener() {
 
 			@Override
 			public boolean onItemLongClick(AdapterView<?> parent, View view,
 					int position, long id) {
-				// TODO Auto-generated method stubsuper.getView(position, convertView, parent);
 				
 				Builder alertDialogBuilder = new AlertDialog.Builder(TodoListManagerActivity.this);
 				alertDialogBuilder.setTitle("Delete task");
 				alertDialogBuilder.setMessage("Do you want to delete " + list.get(position) + '?');
-				final int p = position;
+				final int posToRemove = position;
+				
+				//Delete the item
 				alertDialogBuilder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-					
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
-						list.remove(p);
+						list.remove(posToRemove);
 						taskAdapter.notifyDataSetChanged();
 						
 					}
 				});
+				
+				//Ignore this
 				alertDialogBuilder.setNegativeButton("No", new DialogInterface.OnClickListener() {
-					
 					public void onClick(DialogInterface dialog, int which) {
 						dialog.cancel();
 						
