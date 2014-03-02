@@ -27,7 +27,6 @@ class ColorListAdapter extends ArrayAdapter<String> {
 			tv.setTextColor(Color.BLUE);
 		return tv;
 		
-		
 	}
  
  
