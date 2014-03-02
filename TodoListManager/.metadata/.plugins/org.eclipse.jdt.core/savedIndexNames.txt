@@ -1,0 +1,2 @@
+INDEX VERSION 1.126+C:\Users\Ilia\Documents\My Dropbox\My Lessons\android\ex2\.metadata\.plugins\org.eclipse.jdt.core
+2470724118.index
