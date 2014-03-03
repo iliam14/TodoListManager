@@ -20,85 +20,85 @@ public class TodoListManagerActivity extends Activity {
 
 	private ArrayList<String> list;
 	private ArrayAdapter<String> taskAdapter;
-	
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        list = new ArrayList<String>();
-        
-        setContentView(R.layout.activity_todo_list_manager);
-        taskAdapter = new ColorListAdapter(this, R.layout.single_list_item, list);
-        taskAdapter.setNotifyOnChange(true);
-        
-        ListView lstToDoItems = (ListView)findViewById(R.id.lstTodoItems);
-        lstToDoItems.setAdapter(taskAdapter);
-        lstToDoItems.setOnItemLongClickListener(new OnItemLongClickListener() {
+
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		list = new ArrayList<String>();
+
+		setContentView(R.layout.activity_todo_list_manager);
+		taskAdapter = new ColorListAdapter(this, R.layout.single_list_item,
+				list);
+		taskAdapter.setNotifyOnChange(true);
+
+		ListView lstToDoItems = (ListView) findViewById(R.id.lstTodoItems);
+		lstToDoItems.setAdapter(taskAdapter); // apply our adapter
+		lstToDoItems.setOnItemLongClickListener(new OnItemLongClickListener() {
 
 			@Override
 			public boolean onItemLongClick(AdapterView<?> parent, View view,
 					int position, long id) {
-				
-				Builder alertDialogBuilder = new AlertDialog.Builder(TodoListManagerActivity.this);
-				alertDialogBuilder.setTitle("Delete task");
-				alertDialogBuilder.setMessage("Do you want to delete " + list.get(position) + '?');
+
 				final int posToRemove = position;
-				
-				//Delete the item
-				alertDialogBuilder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						list.remove(posToRemove);
-						taskAdapter.notifyDataSetChanged();
-						
-					}
-				});
-				
-				//Ignore this
-				alertDialogBuilder.setNegativeButton("No", new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int which) {
-						dialog.cancel();
-						
-					}
-				});
-				alertDialogBuilder.create().show();
-				
+
+				Builder alertDialogBuilder = new AlertDialog.Builder(
+						TodoListManagerActivity.this);
+				// Configure the dialog
+				alertDialogBuilder
+						.setTitle(list.get(position))
+						.setMessage("Do you want to delete this task?")
+						.setPositiveButton("Yes",
+								new DialogInterface.OnClickListener() {
+									@Override
+									public void onClick(DialogInterface dialog,
+											int which) {
+										// remove this item
+										list.remove(posToRemove);
+										taskAdapter.notifyDataSetChanged();
+
+									}
+								})
+						.setNegativeButton("No",
+								new DialogInterface.OnClickListener() {
+									public void onClick(DialogInterface dialog,
+											int which) {
+										// just close the dialog
+										dialog.cancel();
+
+									}
+								}).create().show();
+
 				return false;
 			}
-        	
-        	
-			
 		});
-            }
+	}
 
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		// Inflate the menu; this adds items to the action bar if it is present.
+		getMenuInflater().inflate(R.menu.todo_list_manager, menu);
+		return true;
+	}
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.todo_list_manager, menu);
-        return true;
-    }
-    
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-    	switch (item.getItemId()) {
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
 		case R.id.menuItemAdd:
-			EditText edtNewItem = (EditText)findViewById(R.id.edtNewItem);
+			EditText edtNewItem = (EditText) findViewById(R.id.edtNewItem);
 			String input = edtNewItem.getText().toString();
-			if (!"".equals(input))
-			{
+
+			// don't add empty strings
+			if (!"".equals(input)) {
 				list.add(input);
 				taskAdapter.notifyDataSetChanged();
 			}
-			
+
 			edtNewItem.setText(null);
 			return true;
-			
 
 		default:
 			return super.onOptionsItemSelected(item);
-			
+
 		}
-    }
+	}
 }
-
-
