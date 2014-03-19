@@ -100,12 +100,11 @@ public class TodoListManagerActivity extends Activity {
 			String title = data.getStringExtra("title");
 
 			Pair<String, Date> pair = new Pair<String, Date>(title, date);
-			if (!"".equals(title))
-			{
+			if (!"".equals(title)) {
 				list.add(pair);
 				taskAdapter.notifyDataSetChanged();
 			}
-			
+
 		}
 
 	}

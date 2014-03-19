@@ -15,60 +15,54 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
-
 // Coloring Adapter
 @SuppressLint("SimpleDateFormat")
-class ColorListAdapter extends ArrayAdapter<Pair<String,Date>> {
+class ColorListAdapter extends ArrayAdapter<Pair<String, Date>> {
 
-	List<Pair<String,Date>> list;
-	public ColorListAdapter(Context context, int resource, List<Pair<String,Date>> objects) {
+	List<Pair<String, Date>> list;
+
+	public ColorListAdapter(Context context, int resource,
+			List<Pair<String, Date>> objects) {
 		super(context, resource, objects);
-		list=objects;
+		list = objects;
 	}
 
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
-		
+
 		View v = convertView;
-		if(v == null){
-			LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		if (v == null) {
+			LayoutInflater inflater = (LayoutInflater) getContext()
+					.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 			v = inflater.inflate(R.layout.single_list_item, null);
 		}
-		
-		
-		Calendar cal = Calendar.getInstance(); 
-		Date		taskDue = list.get(position).second;
-		
+
+		Calendar cal = Calendar.getInstance();
+		Date taskDue = list.get(position).second;
+
 		cal.set(Calendar.HOUR, 0);
 		cal.set(Calendar.MINUTE, 0);
 		cal.set(Calendar.SECOND, 0);
 		cal.set(Calendar.MILLISECOND, 0);
 		Date today = cal.getTime();
 
-
 		TextView txtTitle = (TextView) v.findViewById(R.id.txtTodoTitle);
 		TextView txtDueDate = (TextView) v.findViewById(R.id.txtTodoDueDate);
-		
-		
-		
-		if (today.after(taskDue) )
-		{
+
+		if (today.after(taskDue)) {
 			txtTitle.setTextColor(Color.RED);
 			txtDueDate.setTextColor(Color.RED);
-		}
-		else
-		{
+		} else {
 			txtTitle.setTextColor(Color.BLACK);
 			txtDueDate.setTextColor(Color.BLACK);
 		}
-			
+
 		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
-		
+
 		txtTitle.setText(list.get(position).first);
 		txtDueDate.setText(sdf.format(taskDue));
 		return v;
 
-		
 	}
 
 }
