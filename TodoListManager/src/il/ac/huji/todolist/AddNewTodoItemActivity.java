@@ -2,10 +2,8 @@ package il.ac.huji.todolist;
 
 import java.util.Calendar;
 import java.util.Date;
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -17,17 +15,12 @@ public class AddNewTodoItemActivity extends Activity {
 
 	/** Called when the activity is first created. */
 
-	@SuppressLint("NewApi")
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
 		setContentView(R.layout.add_new_todo_item);
 		final DatePicker datePicker = (DatePicker) findViewById(R.id.datePicker);
-
-		if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-			datePicker.setCalendarViewShown(false);
-		}
 
 		final EditText edtNewItem = (EditText) findViewById(R.id.edtNewItem);
 		Button btnOK = (Button) findViewById(R.id.btnOK);
@@ -39,10 +32,11 @@ public class AddNewTodoItemActivity extends Activity {
 				calendar.set(datePicker.getYear(), datePicker.getMonth(),
 						datePicker.getDayOfMonth());
 				Date date = calendar.getTime();
-
+				
+				// Create and send result intent
 				Intent result = new Intent();
-				result.putExtra("dueDate", date);
 				result.putExtra("title", edtNewItem.getText().toString());
+				result.putExtra("dueDate", date);
 				setResult(RESULT_OK, result);
 				finish();
 			}

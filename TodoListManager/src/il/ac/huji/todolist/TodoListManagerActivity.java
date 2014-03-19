@@ -20,6 +20,7 @@ import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+
 public class TodoListManagerActivity extends Activity {
 
 	private ArrayList<Pair<String, Date>> list;
@@ -100,6 +101,7 @@ public class TodoListManagerActivity extends Activity {
 			String title = data.getStringExtra("title");
 
 			Pair<String, Date> pair = new Pair<String, Date>(title, date);
+			// Skip empty titles
 			if (!"".equals(title)) {
 				list.add(pair);
 				taskAdapter.notifyDataSetChanged();
@@ -113,18 +115,9 @@ public class TodoListManagerActivity extends Activity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.menuItemAdd:
-			// EditText edtNewItem = (EditText) findViewById(R.id.edtNewItem);
-			// String input = edtNewItem.getText().toString();
 			Intent intent = new Intent(this, AddNewTodoItemActivity.class);
 			startActivityForResult(intent, 0);
 
-			// don't add empty strings
-			// if (!"".equals(input)) {
-			// list.add(input);
-			// taskAdapter.notifyDataSetChanged();
-			// }
-			//
-			// edtNewItem.setText(null);
 			return true;
 
 		default:
