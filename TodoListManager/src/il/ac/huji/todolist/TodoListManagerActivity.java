@@ -1,30 +1,35 @@
 package il.ac.huji.todolist;
 
 import java.util.ArrayList;
+import java.util.Date;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
+import android.util.Pair;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ArrayAdapter;
-import android.widget.EditText;
 import android.widget.ListView;
 
 public class TodoListManagerActivity extends Activity {
 
-	private ArrayList<String> list;
-	private ArrayAdapter<String> taskAdapter;
+	private ArrayList<Pair<String, Date>> list;
+	private ArrayAdapter<Pair<String, Date>> taskAdapter;
 
+	@SuppressLint("NewApi")
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		list = new ArrayList<String>();
+		list = new ArrayList<Pair<String, Date>>();
 
 		setContentView(R.layout.activity_todo_list_manager);
 		taskAdapter = new ColorListAdapter(this, R.layout.single_list_item,
@@ -43,27 +48,35 @@ public class TodoListManagerActivity extends Activity {
 
 				Builder alertDialogBuilder = new AlertDialog.Builder(
 						TodoListManagerActivity.this);
-				// Configure the dialog
+
+				ArrayList<String> items = new ArrayList<String>();
+				items.add("Delete item");
+				String telnumber1 = null;
+				if (list.get(position).first.startsWith("Call ")) {
+					items.add(list.get(position).first);
+					telnumber1 = list.get(position).first.substring("Call "
+							.length());
+				}
+				final String telnumber = telnumber1;
 				alertDialogBuilder
-						.setTitle(list.get(position))
-						.setMessage("Do you want to delete this task?")
-						.setPositiveButton("Yes",
+						.setTitle(list.get(position).first)
+						.setItems(items.toArray(new String[items.size()]),
 								new DialogInterface.OnClickListener() {
+
 									@Override
 									public void onClick(DialogInterface dialog,
 											int which) {
-										// remove this item
-										list.remove(posToRemove);
-										taskAdapter.notifyDataSetChanged();
-
-									}
-								})
-						.setNegativeButton("No",
-								new DialogInterface.OnClickListener() {
-									public void onClick(DialogInterface dialog,
-											int which) {
-										// just close the dialog
-										dialog.cancel();
+										if (which == 0) {
+											list.remove(posToRemove);
+											taskAdapter.notifyDataSetChanged();
+										} else if (which == 1) {
+											// call
+											Intent dial = new Intent(
+													Intent.ACTION_DIAL,
+													Uri.parse("tel:"
+															+ telnumber));
+											startActivity(dial);
+										}
 
 									}
 								}).create().show();
@@ -81,19 +94,38 @@ public class TodoListManagerActivity extends Activity {
 	}
 
 	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		if (requestCode == 0 && resultCode == RESULT_OK) {
+			Date date = (Date) data.getSerializableExtra("dueDate");
+			String title = data.getStringExtra("title");
+
+			Pair<String, Date> pair = new Pair<String, Date>(title, date);
+			if (!"".equals(title))
+			{
+				list.add(pair);
+				taskAdapter.notifyDataSetChanged();
+			}
+			
+		}
+
+	}
+
+	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.menuItemAdd:
-			EditText edtNewItem = (EditText) findViewById(R.id.edtNewItem);
-			String input = edtNewItem.getText().toString();
+			// EditText edtNewItem = (EditText) findViewById(R.id.edtNewItem);
+			// String input = edtNewItem.getText().toString();
+			Intent intent = new Intent(this, AddNewTodoItemActivity.class);
+			startActivityForResult(intent, 0);
 
 			// don't add empty strings
-			if (!"".equals(input)) {
-				list.add(input);
-				taskAdapter.notifyDataSetChanged();
-			}
-
-			edtNewItem.setText(null);
+			// if (!"".equals(input)) {
+			// list.add(input);
+			// taskAdapter.notifyDataSetChanged();
+			// }
+			//
+			// edtNewItem.setText(null);
 			return true;
 
 		default:
@@ -101,4 +133,5 @@ public class TodoListManagerActivity extends Activity {
 
 		}
 	}
+
 }
