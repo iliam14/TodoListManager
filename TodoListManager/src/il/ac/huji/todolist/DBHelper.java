@@ -39,15 +39,14 @@ public class DBHelper extends SQLiteOpenHelper {
 
 	@Override
 	public void onCreate(SQLiteDatabase db) {
-		Log.d("DBHelper","OnCreate");
 		ParseQuery<ParseObject> query = ParseQuery.getQuery(PARSE_CLASS);
+
+		// Clear the entries in the Parse Table
 		query.findInBackground(new FindCallback<ParseObject>() {
-			
 			@Override
 			public void done(List<ParseObject> resList, ParseException e) {
 				if (e == null) {
-					for (ParseObject object : resList)
-					{
+					for (ParseObject object : resList) {
 						object.deleteInBackground();
 					}
 				} else {
@@ -57,35 +56,36 @@ public class DBHelper extends SQLiteOpenHelper {
 			}
 		});
 		db.execSQL(CREATE_DB);
-		
+
 	}
 
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-		Log.d("DBHelper","OnUpgrade");
 		db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME);
 		onCreate(db);
 	}
 
 	public void insert(String taskName, Date due) {
-		Log.d("DBHelper", "insert");
 		ContentValues task = new ContentValues();
 		task.put(COLUMN_TITLE, taskName);
 		task.put(COLUMN_DUE, due.getTime());
 		long KeyID = getWritableDatabase().insert(TABLE_NAME, null, task);
-		
+
 		// Inset task to parse
 		ParseObject parseTask = new ParseObject(PARSE_CLASS);
 		parseTask.put(COLUMN_TITLE, taskName);
 		parseTask.put(COLUMN_DUE, due.getTime());
 		parseTask.put(COLUMN_SYNC, String.valueOf(KeyID));
 		parseTask.saveInBackground();
-		
+
 	}
 
 	public void remove(int id) {
+		// remove from SQLite
 		getWritableDatabase().delete(TABLE_NAME, "_id = ?",
 				new String[] { String.valueOf(id) });
+		
+		// remove from Parse
 		ParseQuery<ParseObject> query = ParseQuery.getQuery(PARSE_CLASS);
 		query.whereEqualTo(COLUMN_SYNC, String.valueOf(id));
 		query.findInBackground(new FindCallback<ParseObject>() {
