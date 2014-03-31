@@ -29,7 +29,7 @@ public class TodoListManagerActivity extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		helper = new DBHelper(this);
+		helper = DBHelper.getInstance(this);
 
 		setContentView(R.layout.activity_todo_list_manager);
 

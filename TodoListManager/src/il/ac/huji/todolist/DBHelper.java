@@ -8,6 +8,7 @@ import com.parse.Parse;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
+import com.parse.ParseUser;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -25,20 +26,32 @@ public class DBHelper extends SQLiteOpenHelper {
 	private static final String COLUMN_TITLE = "title";
 	private static final String COLUMN_DUE = "due";
 	private static final String COLUMN_SYNC = "LocalId";
-	private static final String PARSE_CLASS = "task";
+	private static final String PARSE_CLASS = "todo";
 
 	private static final String CREATE_DB = "create table " + TABLE_NAME + "("
 			+ COLUMN_ID + " integer primary key autoincrement, " + COLUMN_TITLE
 			+ " string, " + COLUMN_DUE + " long);";
 
-	public DBHelper(Context context) {
+	private static DBHelper _instance;
+
+	private DBHelper(Context context) {
 		super(context, DB_NAME, null, 1);
 		Parse.initialize(context, "8iZEZzycf1oE2yMHUMYYBccZ1QBBU4ch00bpNXJt",
 				"VMg7Icyf2phMhUd7ZzW4I7kfyN1qvyNrIT0rJVCs");
+
+	}
+
+	// Singelton inteface
+	public static DBHelper getInstance(Context context) {
+		if (_instance == null) {
+			_instance = new DBHelper(context);
+		}
+		return _instance;
 	}
 
 	@Override
 	public void onCreate(SQLiteDatabase db) {
+		Log.d("DBHelper", "onCreate");
 		ParseQuery<ParseObject> query = ParseQuery.getQuery(PARSE_CLASS);
 
 		// Clear the entries in the Parse Table
@@ -55,12 +68,15 @@ public class DBHelper extends SQLiteOpenHelper {
 
 			}
 		});
+
+		ParseUser.enableAutomaticUser();
 		db.execSQL(CREATE_DB);
 
 	}
 
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+		Log.d("DBHelper", "onUpgrade");
 		db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME);
 		onCreate(db);
 	}
@@ -84,7 +100,7 @@ public class DBHelper extends SQLiteOpenHelper {
 		// remove from SQLite
 		getWritableDatabase().delete(TABLE_NAME, "_id = ?",
 				new String[] { String.valueOf(id) });
-		
+
 		// remove from Parse
 		ParseQuery<ParseObject> query = ParseQuery.getQuery(PARSE_CLASS);
 		query.whereEqualTo(COLUMN_SYNC, String.valueOf(id));
