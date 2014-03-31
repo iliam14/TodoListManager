@@ -9,43 +9,43 @@ import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import android.util.Pair;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemLongClickListener;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 
 public class TodoListManagerActivity extends Activity {
 
-	private ArrayList<Pair<String, Date>> list;
-	private ArrayAdapter<Pair<String, Date>> taskAdapter;
+//	private SimpleCursorAdapter _curAdapter;
+	private TodoListCursorAdapter _curAdapter;
+	private DBHelper helper;
 
+	
 	@SuppressLint("NewApi")
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		list = new ArrayList<Pair<String, Date>>();
+		Log.d("TodoList", "start");
+		helper = new DBHelper(this);
 
 		setContentView(R.layout.activity_todo_list_manager);
-		taskAdapter = new ColorListAdapter(this, R.layout.single_list_item,
-				list);
-		taskAdapter.setNotifyOnChange(true);
 
-		ListView lstToDoItems = (ListView) findViewById(R.id.lstTodoItems);
-		lstToDoItems.setAdapter(taskAdapter); // apply our adapter
+		final ListView lstToDoItems = (ListView) findViewById(R.id.lstTodoItems);
+
+		_curAdapter = new TodoListCursorAdapter(this, helper.getCursor() );
+		lstToDoItems.setAdapter(_curAdapter);
 		lstToDoItems.setOnItemLongClickListener(new OnItemLongClickListener() {
 
 			@Override
 			public boolean onItemLongClick(AdapterView<?> parent, View view,
 					int position, long id) {
-
-				final int posToRemove = position;
 
 				Builder alertDialogBuilder = new AlertDialog.Builder(
 						TodoListManagerActivity.this);
@@ -53,14 +53,16 @@ public class TodoListManagerActivity extends Activity {
 				ArrayList<String> items = new ArrayList<String>();
 				items.add("Delete item");
 				String telnumber1 = null;
-				if (list.get(position).first.startsWith("Call ")) {
-					items.add(list.get(position).first);
-					telnumber1 = list.get(position).first.substring("Call "
+				final Cursor cur = (Cursor)_curAdapter.getItem(position);
+				String taskName = cur.getString(1);
+				if (taskName.startsWith("Call ")) {
+					items.add(taskName);
+					telnumber1 = taskName.substring("Call "
 							.length());
 				}
 				final String telnumber = telnumber1;
 				alertDialogBuilder
-						.setTitle(list.get(position).first)
+						.setTitle(taskName)
 						.setItems(items.toArray(new String[items.size()]),
 								new DialogInterface.OnClickListener() {
 
@@ -68,8 +70,9 @@ public class TodoListManagerActivity extends Activity {
 									public void onClick(DialogInterface dialog,
 											int which) {
 										if (which == 0) {
-											list.remove(posToRemove);
-											taskAdapter.notifyDataSetChanged();
+											helper.remove(cur.getInt(0));
+											_curAdapter.changeCursor(helper.getCursor());
+
 										} else if (which == 1) {
 											// call
 											Intent dial = new Intent(
@@ -100,11 +103,11 @@ public class TodoListManagerActivity extends Activity {
 			Date date = (Date) data.getSerializableExtra("dueDate");
 			String title = data.getStringExtra("title");
 
-			Pair<String, Date> pair = new Pair<String, Date>(title, date);
 			// Skip empty titles
 			if (!"".equals(title)) {
-				list.add(pair);
-				taskAdapter.notifyDataSetChanged();
+				helper.insert(title, date);
+				_curAdapter.changeCursor(helper.getCursor());
+				_curAdapter.notifyDataSetChanged();
 			}
 
 		}

@@ -3,44 +3,29 @@ package il.ac.huji.todolist;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.database.Cursor;
 import android.graphics.Color;
-import android.util.Pair;
+import android.support.v4.widget.CursorAdapter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
-// Coloring Adapter
 @SuppressLint("SimpleDateFormat")
-class ColorListAdapter extends ArrayAdapter<Pair<String, Date>> {
+public class TodoListCursorAdapter extends CursorAdapter {
 
-	List<Pair<String, Date>> list;
-	
 	// set date format
 	final SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
-
-	public ColorListAdapter(Context context, int resource,
-			List<Pair<String, Date>> objects) {
-		super(context, resource, objects);
-		list = objects;
+	
+	public TodoListCursorAdapter(Context context, Cursor c) {
+		super(context, c,CursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER);
 	}
 
 	@Override
-	public View getView(int position, View convertView, ViewGroup parent) {
-
-		View v = convertView;
-		// set layout 
-		if (v == null) {
-			LayoutInflater inflater = (LayoutInflater) getContext()
-					.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-			v = inflater.inflate(R.layout.single_list_item, null);
-		}
-
+	public void bindView(View v, Context cntx, Cursor cursor) {
 		// Set the today date (without time)
 		Calendar cal = Calendar.getInstance();
 		cal.set(Calendar.HOUR, 0);
@@ -49,8 +34,9 @@ class ColorListAdapter extends ArrayAdapter<Pair<String, Date>> {
 		cal.set(Calendar.MILLISECOND, 0);
 		Date today = cal.getTime();
 		
+
 		// The due date of the current task
-		Date taskDue = list.get(position).second;
+		Date taskDue = new Date( cursor.getLong(2));
 
 		// Get handle to text views
 		TextView txtTitle = (TextView) v.findViewById(R.id.txtTodoTitle);
@@ -68,13 +54,25 @@ class ColorListAdapter extends ArrayAdapter<Pair<String, Date>> {
 			}			
 			txtDueDate.setText(sdf.format(taskDue));
 		}
-		else
-		{
-			txtDueDate.setText("No due date");
-		}
-		txtTitle.setText(list.get(position).first);
-		return v;
+//		else
+//		{
+//			txtDueDate.setText("No due date");
+//		}
+		txtTitle.setText(cursor.getString(1));
 
+		
 	}
+
+
+	@Override
+	public View newView(Context context, Cursor cursor, ViewGroup parent) {
+		// when the view will be created for first time, we inflate the row layout
+		LayoutInflater inflater = LayoutInflater.from(parent.getContext());
+		View view = inflater.inflate(R.layout.single_list_item, parent, false);
+
+		return view;
+	}
+
+
 
 }
