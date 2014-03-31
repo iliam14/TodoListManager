@@ -32,7 +32,7 @@ public class AddNewTodoItemActivity extends Activity {
 				calendar.set(datePicker.getYear(), datePicker.getMonth(),
 						datePicker.getDayOfMonth());
 				Date date = calendar.getTime();
-				
+
 				// Create and send result intent
 				Intent result = new Intent();
 				result.putExtra("title", edtNewItem.getText().toString());

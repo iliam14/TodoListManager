@@ -20,26 +20,23 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ListView;
 
-
 public class TodoListManagerActivity extends Activity {
 
-//	private SimpleCursorAdapter _curAdapter;
+	// private SimpleCursorAdapter _curAdapter;
 	private TodoListCursorAdapter _curAdapter;
 	private DBHelper helper;
 
-	
 	@SuppressLint("NewApi")
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		Log.d("TodoList", "start");
 		helper = new DBHelper(this);
 
 		setContentView(R.layout.activity_todo_list_manager);
 
 		final ListView lstToDoItems = (ListView) findViewById(R.id.lstTodoItems);
 
-		_curAdapter = new TodoListCursorAdapter(this, helper.getCursor() );
+		_curAdapter = new TodoListCursorAdapter(this, helper.getCursor());
 		lstToDoItems.setAdapter(_curAdapter);
 		lstToDoItems.setOnItemLongClickListener(new OnItemLongClickListener() {
 
@@ -53,12 +50,11 @@ public class TodoListManagerActivity extends Activity {
 				ArrayList<String> items = new ArrayList<String>();
 				items.add("Delete item");
 				String telnumber1 = null;
-				final Cursor cur = (Cursor)_curAdapter.getItem(position);
+				final Cursor cur = (Cursor) _curAdapter.getItem(position);
 				String taskName = cur.getString(1);
 				if (taskName.startsWith("Call ")) {
 					items.add(taskName);
-					telnumber1 = taskName.substring("Call "
-							.length());
+					telnumber1 = taskName.substring("Call ".length());
 				}
 				final String telnumber = telnumber1;
 				alertDialogBuilder
@@ -71,7 +67,8 @@ public class TodoListManagerActivity extends Activity {
 											int which) {
 										if (which == 0) {
 											helper.remove(cur.getInt(0));
-											_curAdapter.changeCursor(helper.getCursor());
+											_curAdapter.changeCursor(helper
+													.getCursor());
 
 										} else if (which == 1) {
 											// call
