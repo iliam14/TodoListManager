@@ -51,7 +51,6 @@ public class DBHelper extends SQLiteOpenHelper {
 
 	@Override
 	public void onCreate(SQLiteDatabase db) {
-		Log.d("DBHelper", "onCreate");
 		ParseQuery<ParseObject> query = ParseQuery.getQuery(PARSE_CLASS);
 
 		// Clear the entries in the Parse Table
@@ -76,7 +75,6 @@ public class DBHelper extends SQLiteOpenHelper {
 
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-		Log.d("DBHelper", "onUpgrade");
 		db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME);
 		onCreate(db);
 	}

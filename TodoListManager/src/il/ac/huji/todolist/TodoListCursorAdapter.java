@@ -34,14 +34,16 @@ public class TodoListCursorAdapter extends CursorAdapter {
 		cal.set(Calendar.MILLISECOND, 0);
 		Date today = cal.getTime();
 
-		// The due date of the current task
-		Date taskDue = new Date(cursor.getLong(2));
-
+		// the raw format of the the date
+		Long rawDate = cursor.getLong(2);
+		
 		// Get handle to text views
 		TextView txtTitle = (TextView) v.findViewById(R.id.txtTodoTitle);
 		TextView txtDueDate = (TextView) v.findViewById(R.id.txtTodoDueDate);
 
-		if (taskDue != null) {
+		if (rawDate != null) {
+			// The due date of the current task
+			Date taskDue = new Date(rawDate);
 			// set the color of the task
 			if (today.after(taskDue)) {
 				txtTitle.setTextColor(Color.RED);
@@ -52,10 +54,10 @@ public class TodoListCursorAdapter extends CursorAdapter {
 			}
 			txtDueDate.setText(sdf.format(taskDue));
 		}
-		// else
-		// {
-		// txtDueDate.setText("No due date");
-		// }
+		else
+		{
+			txtDueDate.setText("No due date");
+		}
 		txtTitle.setText(cursor.getString(1));
 
 	}
