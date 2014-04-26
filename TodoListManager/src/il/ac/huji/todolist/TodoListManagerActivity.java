@@ -11,7 +11,9 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -25,6 +27,65 @@ public class TodoListManagerActivity extends Activity {
 	private TodoListCursorAdapter _curAdapter;
 	private DBHelper helper;
 
+	private class TaskDesc
+	{
+		public TaskDesc(String name, Date due) {
+			_name=name;
+			_due=due;
+		}
+		public String getName(){
+			return _name;
+		}
+		
+		public Date due(){
+			return _due;
+		}
+		
+		private String _name;
+		private Date _due;
+	}
+		
+	private class TaskCreater extends AsyncTask<TaskDesc, Void, Void>
+	{
+		@Override
+		protected Void doInBackground(TaskDesc... tasks) {
+			for (TaskDesc task : tasks)
+			{
+				helper.insert(task.getName(), task.due());
+			}
+			return null;
+		}
+
+		@Override
+		protected void onPostExecute(Void result) {
+			_curAdapter.changeCursor(helper.getCursor());
+			_curAdapter.notifyDataSetChanged();
+		}
+		
+	}
+	
+	private class DeleteTask extends AsyncTask<Integer, Void, Void>{
+
+		@Override
+		protected Void doInBackground(Integer... params) {
+			// TODO Auto-generated method stub
+			
+			for (Integer index : params){
+				helper.remove(index.intValue());
+			}
+			
+			return null;
+		}
+
+		@Override
+		protected void onPostExecute(Void result) {
+			_curAdapter.changeCursor(helper.getCursor());
+			super.onPostExecute(result);
+			
+		}
+		
+	}
+	
 	@SuppressLint("NewApi")
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -35,8 +96,17 @@ public class TodoListManagerActivity extends Activity {
 
 		final ListView lstToDoItems = (ListView) findViewById(R.id.lstTodoItems);
 
-		_curAdapter = new TodoListCursorAdapter(this, helper.getCursor());
-		lstToDoItems.setAdapter(_curAdapter);
+		new Handler().post(new Runnable() {
+			
+			@Override
+			public void run() {
+				_curAdapter = new TodoListCursorAdapter(
+						TodoListManagerActivity.this, helper.getCursor());
+				lstToDoItems.setAdapter(_curAdapter);
+			}
+		});
+		
+		
 		lstToDoItems.setOnItemLongClickListener(new OnItemLongClickListener() {
 
 			@Override
@@ -65,9 +135,10 @@ public class TodoListManagerActivity extends Activity {
 									public void onClick(DialogInterface dialog,
 											int which) {
 										if (which == 0) {
-											helper.remove(cur.getInt(0));
-											_curAdapter.changeCursor(helper
-													.getCursor());
+											//helper.remove(cur.getInt(0));
+											//_curAdapter.changeCursor(helper
+											//		.getCursor());
+											new DeleteTask().execute(cur.getInt(0));
 
 										} else if (which == 1) {
 											// call
@@ -101,9 +172,10 @@ public class TodoListManagerActivity extends Activity {
 
 			// Skip empty titles
 			if (!"".equals(title)) {
-				helper.insert(title, date);
-				_curAdapter.changeCursor(helper.getCursor());
-				_curAdapter.notifyDataSetChanged();
+				//helper.insert(title, date);
+				//_curAdapter.changeCursor(helper.getCursor());
+				//_curAdapter.notifyDataSetChanged();
+				new TaskCreater().execute(new TaskDesc(title, date));
 			}
 
 		}
