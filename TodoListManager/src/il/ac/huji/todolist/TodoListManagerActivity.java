@@ -23,66 +23,83 @@ import android.widget.ListView;
 
 public class TodoListManagerActivity extends Activity {
 
+	
+	//TODO Remove me.
 	// private SimpleCursorAdapter _curAdapter;
-	private TodoListCursorAdapter _curAdapter;
+	//private TodoListCursorAdapter _curAdapter;
+	private TodoListArrayAdapter _curAdapter;
 	private DBHelper helper;
+		
+//
+//	private class TaskCreater extends AsyncTask<TaskDesc, Void, Void>
+//	{
+//		@Override
+//		protected Void doInBackground(TaskDesc... tasks) {
+//			for (TaskDesc task : tasks)
+//			{
+//				helper.insert(task.getName(), task.due());
+//			}
+//			return null;
+//		}
+//
+//		@Override
+//		protected void onPostExecute(Void result) {
+//			_curAdapter.changeCursor(helper.getCursor());
+//			_curAdapter.notifyDataSetChanged();
+//		}
+//		
+//	}
+//	
+//	private class DeleteTask extends AsyncTask<Integer, Void, Void>{
+//
+//		@Override
+//		protected Void doInBackground(Integer... params) {
+//			// TODO Auto-generated method stub
+//			
+//			for (Integer index : params){
+//				helper.remove(index.intValue());
+//			}
+//			
+//			return null;
+//		}
+//
+//		@Override
+//		protected void onPostExecute(Void result) {
+//			_curAdapter.changeCursor(helper.getCursor());
+//			super.onPostExecute(result);
+//			
+//		}
+//		
+//	}
+	
+	private class AsyncTaskLoader extends AsyncTask<Cursor, TaskDesc, Void>
+	{
 
-	private class TaskDesc
-	{
-		public TaskDesc(String name, Date due) {
-			_name=name;
-			_due=due;
-		}
-		public String getName(){
-			return _name;
-		}
-		
-		public Date due(){
-			return _due;
-		}
-		
-		private String _name;
-		private Date _due;
-	}
-		
-	private class TaskCreater extends AsyncTask<TaskDesc, Void, Void>
-	{
 		@Override
-		protected Void doInBackground(TaskDesc... tasks) {
-			for (TaskDesc task : tasks)
-			{
-				helper.insert(task.getName(), task.due());
+		protected Void doInBackground(Cursor... cursors) {
+			
+			Cursor cur = cursors[0];
+			while (cur.moveToNext()) {
+				int id = 	cur.getInt(cur.getColumnIndex(DBHelper.COLUMN_ID));
+				Long date = cur.getLong(cur.getColumnIndex(DBHelper.COLUMN_DUE));
+				String title = cur.getString(cur.getColumnIndex(DBHelper.COLUMN_TITLE));
+				
+				TaskDesc task = new TaskDesc(id, title, new Date(date));
+				publishProgress(task);
+				
 			}
 			return null;
 		}
 
 		@Override
-		protected void onPostExecute(Void result) {
-			_curAdapter.changeCursor(helper.getCursor());
+		protected void onProgressUpdate(TaskDesc... values) {
+			for (TaskDesc task : values){
+				_curAdapter.add(task);
+			}
 			_curAdapter.notifyDataSetChanged();
 		}
 		
-	}
-	
-	private class DeleteTask extends AsyncTask<Integer, Void, Void>{
-
-		@Override
-		protected Void doInBackground(Integer... params) {
-			// TODO Auto-generated method stub
-			
-			for (Integer index : params){
-				helper.remove(index.intValue());
-			}
-			
-			return null;
-		}
-
-		@Override
-		protected void onPostExecute(Void result) {
-			_curAdapter.changeCursor(helper.getCursor());
-			super.onPostExecute(result);
-			
-		}
+		
 		
 	}
 	
@@ -96,15 +113,21 @@ public class TodoListManagerActivity extends Activity {
 
 		final ListView lstToDoItems = (ListView) findViewById(R.id.lstTodoItems);
 
-		new Handler().post(new Runnable() {
-			
-			@Override
-			public void run() {
-				_curAdapter = new TodoListCursorAdapter(
-						TodoListManagerActivity.this, helper.getCursor());
-				lstToDoItems.setAdapter(_curAdapter);
-			}
-		});
+		_curAdapter = new TodoListArrayAdapter(
+				TodoListManagerActivity.this, R.layout.single_list_item);
+		lstToDoItems.setAdapter(_curAdapter);
+
+		new AsyncTaskLoader().execute(helper.getCursor());
+		
+//		new Handler().post(new Runnable() {
+//			
+//			@Override
+//			public void run() {
+//				_curAdapter = new TodoListArrayAdapter(
+//						TodoListManagerActivity.this, R.layout.single_list_item);
+//				lstToDoItems.setAdapter(_curAdapter);
+//			}
+//		});
 		
 		
 		lstToDoItems.setOnItemLongClickListener(new OnItemLongClickListener() {
@@ -119,13 +142,15 @@ public class TodoListManagerActivity extends Activity {
 				ArrayList<String> items = new ArrayList<String>();
 				items.add("Delete item");
 				String telnumber1 = null;
-				final Cursor cur = (Cursor) _curAdapter.getItem(position);
-				String taskName = cur.getString(1);
+				//final Cursor cur = (Cursor) _curAdapter.getItem(position);
+				final TaskDesc curTask = _curAdapter.getItem(position);
+				String taskName = curTask.getName();
 				if (taskName.startsWith("Call ")) {
 					items.add(taskName);
 					telnumber1 = taskName.substring("Call ".length());
 				}
 				final String telnumber = telnumber1;
+				final int pos = position;
 				alertDialogBuilder
 						.setTitle(taskName)
 						.setItems(items.toArray(new String[items.size()]),
@@ -135,10 +160,11 @@ public class TodoListManagerActivity extends Activity {
 									public void onClick(DialogInterface dialog,
 											int which) {
 										if (which == 0) {
-											//helper.remove(cur.getInt(0));
+											helper.remove((int)curTask.id());
+											_curAdapter.remove(_curAdapter.getItem(pos));
 											//_curAdapter.changeCursor(helper
 											//		.getCursor());
-											new DeleteTask().execute(cur.getInt(0));
+											//new DeleteTask().execute(cur.getInt(0));
 
 										} else if (which == 1) {
 											// call
@@ -172,10 +198,10 @@ public class TodoListManagerActivity extends Activity {
 
 			// Skip empty titles
 			if (!"".equals(title)) {
-				//helper.insert(title, date);
-				//_curAdapter.changeCursor(helper.getCursor());
-				//_curAdapter.notifyDataSetChanged();
-				new TaskCreater().execute(new TaskDesc(title, date));
+				long id = helper.insert(title, date);
+				_curAdapter.add(new TaskDesc(id,title,date));
+				_curAdapter.notifyDataSetChanged();
+				//new TaskCreater().execute(new TaskDesc(title, date));
 			}
 
 		}
