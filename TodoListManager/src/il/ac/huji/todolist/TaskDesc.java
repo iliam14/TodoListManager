@@ -5,6 +5,12 @@ import java.util.Date;
 
 public class TaskDesc
 {
+	public TaskDesc(String name, Date due){
+		_name=name;
+		_due=due;
+		_id=0;
+	}
+	
 	public TaskDesc(long id,String name, Date due) {
 		_name=name;
 		_due=due;
@@ -20,6 +26,10 @@ public class TaskDesc
 	
 	public long id(){
 		return _id;
+	}
+	
+	public void updateId(long id){
+		_id = id;
 	}
 	
 	private String _name;

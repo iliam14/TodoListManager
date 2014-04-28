@@ -30,47 +30,57 @@ public class TodoListManagerActivity extends Activity {
 	private TodoListArrayAdapter _curAdapter;
 	private DBHelper helper;
 		
-//
-//	private class TaskCreater extends AsyncTask<TaskDesc, Void, Void>
-//	{
-//		@Override
-//		protected Void doInBackground(TaskDesc... tasks) {
-//			for (TaskDesc task : tasks)
-//			{
-//				helper.insert(task.getName(), task.due());
-//			}
-//			return null;
-//		}
-//
-//		@Override
-//		protected void onPostExecute(Void result) {
+
+	private class TaskCreater extends AsyncTask<TaskDesc, Void, TaskDesc>
+	{
+		@Override
+		protected TaskDesc doInBackground(TaskDesc... tasks) {
+			TaskDesc task = tasks[0];
+			task.updateId(helper.insert(task.getName(), task.due()));
+				
+				
+			
+			return task;
+		}
+
+		@Override
+		protected void onPostExecute(TaskDesc result) {
 //			_curAdapter.changeCursor(helper.getCursor());
-//			_curAdapter.notifyDataSetChanged();
-//		}
-//		
-//	}
-//	
-//	private class DeleteTask extends AsyncTask<Integer, Void, Void>{
-//
-//		@Override
-//		protected Void doInBackground(Integer... params) {
-//			// TODO Auto-generated method stub
-//			
-//			for (Integer index : params){
-//				helper.remove(index.intValue());
-//			}
-//			
-//			return null;
-//		}
-//
-//		@Override
-//		protected void onPostExecute(Void result) {
-//			_curAdapter.changeCursor(helper.getCursor());
-//			super.onPostExecute(result);
-//			
-//		}
-//		
-//	}
+			_curAdapter.insert(result,0);
+			_curAdapter.notifyDataSetChanged();
+		}
+		
+	}
+	
+	private class DeleteTask extends AsyncTask<TaskDesc, Void, Void>{
+
+		private int _pos;
+		
+		public DeleteTask(int position){
+			_pos = position;
+		}
+		
+		@Override
+		protected Void doInBackground(TaskDesc... params) {
+			// TODO Auto-generated method stub
+			
+			for (TaskDesc task : params){
+				helper.remove((int)task.id());
+				
+				//helper.remove(task.id());
+			}
+			
+			return null;
+		}
+
+		@Override
+		protected void onPostExecute(Void result) {
+			_curAdapter.remove(_curAdapter.getItem(_pos));
+			super.onPostExecute(result);
+			
+		}
+		
+	}
 	
 	private class AsyncTaskLoader extends AsyncTask<Cursor, TaskDesc, Void>
 	{
@@ -160,11 +170,12 @@ public class TodoListManagerActivity extends Activity {
 									public void onClick(DialogInterface dialog,
 											int which) {
 										if (which == 0) {
-											helper.remove((int)curTask.id());
-											_curAdapter.remove(_curAdapter.getItem(pos));
+											//helper.remove((int)curTask.id());
+											//_curAdapter.remove(_curAdapter.getItem(pos));
+											
 											//_curAdapter.changeCursor(helper
 											//		.getCursor());
-											//new DeleteTask().execute(cur.getInt(0));
+											new DeleteTask(pos).execute(curTask);
 
 										} else if (which == 1) {
 											// call
@@ -198,10 +209,10 @@ public class TodoListManagerActivity extends Activity {
 
 			// Skip empty titles
 			if (!"".equals(title)) {
-				long id = helper.insert(title, date);
-				_curAdapter.add(new TaskDesc(id,title,date));
-				_curAdapter.notifyDataSetChanged();
-				//new TaskCreater().execute(new TaskDesc(title, date));
+//				long id = helper.insert(title, date);
+//				_curAdapter.add(new TaskDesc(id,title,date));
+				//_curAdapter.notifyDataSetChanged();
+				new TaskCreater().execute(new TaskDesc(title, date));
 			}
 
 		}
