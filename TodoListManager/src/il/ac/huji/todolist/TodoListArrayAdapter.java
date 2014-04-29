@@ -34,7 +34,7 @@ public class TodoListArrayAdapter extends ArrayAdapter<TaskDesc> {
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
 		
-		LayoutInflater inflater = (LayoutInflater) _context.getSystemService(_context.LAYOUT_INFLATER_SERVICE);
+		LayoutInflater inflater = (LayoutInflater) _context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		View rowView = inflater.inflate(_resource,parent,false);
 
 		TaskDesc curTask = getItem(position);
@@ -55,17 +55,15 @@ public class TodoListArrayAdapter extends ArrayAdapter<TaskDesc> {
 		TextView txtDueDate = (TextView) rowView.findViewById(R.id.txtTodoDueDate);
 
 		if (rawDate != null) {
-			// The due date of the current task
-			Date taskDue = new Date(rawDate);
 			// set the color of the task
-			if (today.after(taskDue)) {
+			if (today.after(curTask.due())) {
 				txtTitle.setTextColor(Color.RED);
 				txtDueDate.setTextColor(Color.RED);
 			} else {
 				txtTitle.setTextColor(Color.BLACK);
 				txtDueDate.setTextColor(Color.BLACK);
 			}
-			txtDueDate.setText(sdf.format(taskDue));
+			txtDueDate.setText(sdf.format(curTask.due()));
 		}
 		else
 		{

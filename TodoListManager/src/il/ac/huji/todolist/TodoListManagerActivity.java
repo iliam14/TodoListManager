@@ -13,7 +13,6 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -24,34 +23,28 @@ import android.widget.ListView;
 public class TodoListManagerActivity extends Activity {
 
 	
-	//TODO Remove me.
-	// private SimpleCursorAdapter _curAdapter;
-	//private TodoListCursorAdapter _curAdapter;
 	private TodoListArrayAdapter _curAdapter;
 	private DBHelper helper;
 		
-
+	// This class writes to the DB on a new thread.
 	private class TaskCreater extends AsyncTask<TaskDesc, Void, TaskDesc>
 	{
 		@Override
 		protected TaskDesc doInBackground(TaskDesc... tasks) {
 			TaskDesc task = tasks[0];
 			task.updateId(helper.insert(task.getName(), task.due()));
-				
-				
-			
 			return task;
 		}
 
 		@Override
 		protected void onPostExecute(TaskDesc result) {
-//			_curAdapter.changeCursor(helper.getCursor());
 			_curAdapter.insert(result,0);
 			_curAdapter.notifyDataSetChanged();
 		}
 		
 	}
 	
+	// This class deletes from the DB on a new thread.
 	private class DeleteTask extends AsyncTask<TaskDesc, Void, Void>{
 
 		private int _pos;
@@ -62,12 +55,9 @@ public class TodoListManagerActivity extends Activity {
 		
 		@Override
 		protected Void doInBackground(TaskDesc... params) {
-			// TODO Auto-generated method stub
-			
+	
 			for (TaskDesc task : params){
 				helper.remove((int)task.id());
-				
-				//helper.remove(task.id());
 			}
 			
 			return null;
@@ -77,9 +67,7 @@ public class TodoListManagerActivity extends Activity {
 		protected void onPostExecute(Void result) {
 			_curAdapter.remove(_curAdapter.getItem(_pos));
 			super.onPostExecute(result);
-			
 		}
-		
 	}
 	
 	private class AsyncTaskLoader extends AsyncTask<Cursor, TaskDesc, Void>
@@ -89,6 +77,7 @@ public class TodoListManagerActivity extends Activity {
 		protected Void doInBackground(Cursor... cursors) {
 			
 			Cursor cur = cursors[0];
+			// iterate over the cursor and display each task.
 			while (cur.moveToNext()) {
 				int id = 	cur.getInt(cur.getColumnIndex(DBHelper.COLUMN_ID));
 				Long date = cur.getLong(cur.getColumnIndex(DBHelper.COLUMN_DUE));
@@ -102,14 +91,10 @@ public class TodoListManagerActivity extends Activity {
 		}
 
 		@Override
-		protected void onProgressUpdate(TaskDesc... values) {
-			for (TaskDesc task : values){
-				_curAdapter.add(task);
-			}
+		protected void onProgressUpdate(TaskDesc... tasks) {
+			_curAdapter.add(tasks[0]);
 			_curAdapter.notifyDataSetChanged();
 		}
-		
-		
 		
 	}
 	
@@ -128,17 +113,6 @@ public class TodoListManagerActivity extends Activity {
 		lstToDoItems.setAdapter(_curAdapter);
 
 		new AsyncTaskLoader().execute(helper.getCursor());
-		
-//		new Handler().post(new Runnable() {
-//			
-//			@Override
-//			public void run() {
-//				_curAdapter = new TodoListArrayAdapter(
-//						TodoListManagerActivity.this, R.layout.single_list_item);
-//				lstToDoItems.setAdapter(_curAdapter);
-//			}
-//		});
-		
 		
 		lstToDoItems.setOnItemLongClickListener(new OnItemLongClickListener() {
 
@@ -170,11 +144,7 @@ public class TodoListManagerActivity extends Activity {
 									public void onClick(DialogInterface dialog,
 											int which) {
 										if (which == 0) {
-											//helper.remove((int)curTask.id());
-											//_curAdapter.remove(_curAdapter.getItem(pos));
-											
-											//_curAdapter.changeCursor(helper
-											//		.getCursor());
+											// delete task from position pos
 											new DeleteTask(pos).execute(curTask);
 
 										} else if (which == 1) {
@@ -209,9 +179,7 @@ public class TodoListManagerActivity extends Activity {
 
 			// Skip empty titles
 			if (!"".equals(title)) {
-//				long id = helper.insert(title, date);
-//				_curAdapter.add(new TaskDesc(id,title,date));
-				//_curAdapter.notifyDataSetChanged();
+				// add new task asynchronously
 				new TaskCreater().execute(new TaskDesc(title, date));
 			}
 

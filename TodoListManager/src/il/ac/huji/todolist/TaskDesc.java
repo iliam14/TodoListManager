@@ -2,7 +2,7 @@ package il.ac.huji.todolist;
 
 import java.util.Date;
 
-
+// This class describes a task and used for sending the data to async task
 public class TaskDesc
 {
 	public TaskDesc(String name, Date due){
